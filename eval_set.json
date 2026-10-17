@@ -1,6 +1,1006 @@
-[
-  {"question": "How do satellites measure sea level?", "source": "altimetry.pdf", "page": 1},
-  {"question": "What is sea level anomaly?", "source": "primer.pdf", "page": 1},
-  {"question": "How are tsunami warnings issued?", "source": "warnings.pdf", "page": 1},
-  {"question": "How are cyclones tracked?", "source": "cyclones.pdf", "page": 1}
-]
+{
+  "version": "1.1",
+  "created": "2026-10-17",
+  "notes": "pdf_page is the 1-indexed page of the PDF file as downloaded (cover pages included), i.e. pypdf page index + 1. Files: athul2025=RAG_doc1.pdf, shenoi2020=RAG_doc2.pdf, manneela2016=RAG_doc3.pdf, copernicus2021=RAG_doc4.pdf. key_facts are short strings a correct answer must contain; compare after lowercasing and removing spaces and hyphens (so '3 d' matches '3-day' and '3 days'). 'unanswerable' questions should get a 'not in the documents' reply.",
+  "documents": {
+    "athul2025": "RAG_doc1.pdf — Athul et al. 2025, LSTM SLA forecasting, Environ. Res. Lett. 20 104031 (page 1 = cover)",
+    "shenoi2020": "RAG_doc2.pdf — Shenoi et al. 2020, Are we ready for a major tsunami in the Indian Ocean?, Current Science 118(11) (page 1 = JSTOR cover)",
+    "manneela2016": "RAG_doc3.pdf — Manneela et al. 2016, Recent Advances in the Indian Tsunami Early Warning System, PINSA 82(3)",
+    "copernicus2021": "RAG_doc4.pdf — Copernicus C3S Product User Guide and Specification: Sea Level (vDT2021), Taburet, Mertz & Legeais, CLS, 2021"
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "question": "How many days ahead does the LSTM model in the INCOIS study forecast sea level anomaly?",
+      "answer": "It forecasts daily-averaged SLA with a 3-day lead time over the north Indian Ocean.",
+      "key_facts": [
+        "3 d"
+      ],
+      "sources": [
+        {
+          "doc": "athul2025",
+          "pdf_page": 2
+        }
+      ],
+      "type": "factual",
+      "difficulty": "easy"
+    },
+    {
+      "id": "q02",
+      "question": "What spatial resolution and region does the LSTM SLA forecast cover?",
+      "answer": "About 13 km resolution over the north Indian Ocean, defined as 5°N–30°N and 45°E–100°E.",
+      "key_facts": [
+        "13 km",
+        "5°N",
+        "30°N",
+        "45°E",
+        "100°E"
+      ],
+      "sources": [
+        {
+          "doc": "athul2025",
+          "pdf_page": 2
+        },
+        {
+          "doc": "athul2025",
+          "pdf_page": 4
+        }
+      ],
+      "type": "factual",
+      "difficulty": "easy"
+    },
+    {
+      "id": "q03",
+      "question": "What inputs does each LSTM model use to predict SLA at a grid point?",
+      "answer": "Daily-averaged altimetry SLA over a 3×3 grid centred on the target point with a 2-day lookback, giving 18 input values per forecast. It is univariate: only SLA is used, no winds or other variables.",
+      "key_facts": [
+        "3 x 3",
+        "2 d",
+        "18",
+        "univariate"
+      ],
+      "sources": [
+        {
+          "doc": "athul2025",
+          "pdf_page": 4
+        }
+      ],
+      "type": "factual",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q04",
+      "question": "What were the training and testing periods for the LSTM SLA model?",
+      "answer": "Training used 2011–2018 and testing used 2019–2020.",
+      "key_facts": [
+        "2011–2018",
+        "2019–2020"
+      ],
+      "sources": [
+        {
+          "doc": "athul2025",
+          "pdf_page": 4
+        }
+      ],
+      "type": "factual",
+      "difficulty": "easy"
+    },
+    {
+      "id": "q05",
+      "question": "Describe the LSTM architecture and training settings used for SLA forecasting.",
+      "answer": "Two stacked LSTM layers of 50 units each with ReLU activation, each followed by dropout of 0.2; then a dense layer of 25 units (ReLU) and a single-neuron output layer. Trained with Adam (learning rate 0.001), MSE loss, 50 epochs, batch size 32, built in TensorFlow.",
+      "key_facts": [
+        "two",
+        "50",
+        "0.2",
+        "25",
+        "Adam",
+        "0.001",
+        "MSE",
+        "32"
+      ],
+      "sources": [
+        {
+          "doc": "athul2025",
+          "pdf_page": 4
+        }
+      ],
+      "type": "factual",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q06",
+      "question": "How many separate grid-point models were trained over the north Indian Ocean?",
+      "answer": "One univariate LSTM per ocean grid point: 44,865 grid points, excluding land.",
+      "key_facts": [
+        "44865"
+      ],
+      "sources": [
+        {
+          "doc": "athul2025",
+          "pdf_page": 4
+        }
+      ],
+      "type": "factual",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q07",
+      "question": "Why were the LSTM forecasts described as 3-day forecasts even though the models targeted a 7-day lead?",
+      "answer": "The predictions suffered phase lags of 2–6 days, with a median lag of 4 days over about 65% of the domain. The authors randomized the input order to reduce lag and then lag-adjusted the predictions by 4 days, turning the 7-day-lead targets into effective 3-day forecasts.",
+      "key_facts": [
+        "phase lag",
+        "4 d",
+        "65%"
+      ],
+      "sources": [
+        {
+          "doc": "athul2025",
+          "pdf_page": 4
+        }
+      ],
+      "type": "reasoning",
+      "difficulty": "hard"
+    },
+    {
+      "id": "q08",
+      "question": "Why did the authors not use the K-nearest-neighbours and empirical mode decomposition approach for SLA prediction?",
+      "answer": "When they tried that approach over the north Indian Ocean, the predictions had phase lags longer than the prediction horizon, which made the framework ineffective.",
+      "key_facts": [
+        "phase lag",
+        "horizon"
+      ],
+      "sources": [
+        {
+          "doc": "athul2025",
+          "pdf_page": 3
+        }
+      ],
+      "type": "reasoning",
+      "difficulty": "hard"
+    },
+    {
+      "id": "q09",
+      "question": "Which reanalysis product was the LSTM SLA forecast compared against, and what is its resolution?",
+      "answer": "GLORYS12v1 (GLORYS), a global ocean physics reanalysis at about 9 km resolution.",
+      "key_facts": [
+        "GLORYS12v1",
+        "9 km"
+      ],
+      "sources": [
+        {
+          "doc": "athul2025",
+          "pdf_page": 4
+        }
+      ],
+      "type": "factual",
+      "difficulty": "easy"
+    },
+    {
+      "id": "q10",
+      "question": "What RMSE did the LSTM SLA forecast achieve, and where was it worst?",
+      "answer": "About 2–4 cm over most of the domain, rising to about 7 cm in isolated patches of the western Arabian Sea and the northwestern Bay of Bengal. GLORYS RMSE was 3–4 cm larger across the domain.",
+      "key_facts": [
+        "2–4 cm",
+        "7 cm",
+        "western Arabian Sea",
+        "northwestern Bay of Bengal"
+      ],
+      "sources": [
+        {
+          "doc": "athul2025",
+          "pdf_page": 5
+        }
+      ],
+      "type": "numeric",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q11",
+      "question": "What were the KL divergence and symmetric uncertainty values for the LSTM versus GLORYS?",
+      "answer": "KL divergence from AVISO SLA was 0.0266 for the LSTM versus 1.8751 for GLORYS (lower is better). Symmetric uncertainty was 0.4488 for the LSTM versus 0.3044 for GLORYS (higher is better).",
+      "key_facts": [
+        "0.0266",
+        "1.8751",
+        "0.4488",
+        "0.3044"
+      ],
+      "sources": [
+        {
+          "doc": "athul2025",
+          "pdf_page": 5
+        },
+        {
+          "doc": "athul2025",
+          "pdf_page": 6
+        }
+      ],
+      "type": "numeric",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q12",
+      "question": "How reliable is the LSTM when it predicts an SLA of 0.015 m compared with 0.33 m?",
+      "answer": "At a predicted 0.015 m, the observation lies within ±0.04 m 96% of the time for the LSTM, versus 87% for GLORYS. At a larger predicted SLA of 0.33 m, accuracy drops to 67% for the LSTM and 50% for GLORYS.",
+      "key_facts": [
+        "96%",
+        "87%",
+        "67%",
+        "50%"
+      ],
+      "sources": [
+        {
+          "doc": "athul2025",
+          "pdf_page": 6
+        }
+      ],
+      "type": "numeric",
+      "difficulty": "hard"
+    },
+    {
+      "id": "q13",
+      "question": "How were the forecast surface currents validated against in-situ data, and how did they perform?",
+      "answer": "Against daily-averaged currents from 12 OMNI moored buoys across the north Indian Ocean. Both LSTM and GLORYS showed RMSE of about 0.16 m/s and correlations above 0.7, so skill was comparable, but the LSTM provides it 3 days ahead. Coastal currents were also checked against HF-RADAR along the Tamil Nadu coast.",
+      "key_facts": [
+        "12",
+        "OMNI",
+        "0.16",
+        "0.7",
+        "HF-RADAR"
+      ],
+      "sources": [
+        {
+          "doc": "athul2025",
+          "pdf_page": 4
+        },
+        {
+          "doc": "athul2025",
+          "pdf_page": 7
+        }
+      ],
+      "type": "factual",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q14",
+      "question": "What limitations of ML sea level prediction do the LSTM paper's authors acknowledge?",
+      "answer": "ML models depend heavily on historical data, so they struggle beyond the conditions in the training set. Data quality, quantity and resolution limit them, and the stochastic climate system makes it hard to capture the full range of sea level variability, especially during cyclones and storm surges. The synthetic current observations also ignore ageostrophic components.",
+      "key_facts": [
+        "historical data",
+        "cyclones",
+        "storm surges"
+      ],
+      "sources": [
+        {
+          "doc": "athul2025",
+          "pdf_page": 9
+        },
+        {
+          "doc": "athul2025",
+          "pdf_page": 8
+        }
+      ],
+      "type": "summary",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q15",
+      "question": "When was the Indian Tsunami Early Warning System established, and why?",
+      "answer": "It was established at INCOIS, Hyderabad, and became operational in October 2007, in response to the 26 December 2004 Indian Ocean tsunami, when no warning system existed in the Indian Ocean.",
+      "key_facts": [
+        "October 2007",
+        "2004"
+      ],
+      "sources": [
+        {
+          "doc": "shenoi2020",
+          "pdf_page": 2
+        },
+        {
+          "doc": "manneela2016",
+          "pdf_page": 2
+        }
+      ],
+      "type": "factual",
+      "difficulty": "easy"
+    },
+    {
+      "id": "q16",
+      "question": "How many people did the 2004 Indian Ocean tsunami kill, and what damage did it cause?",
+      "answer": "More than 228,000 people were killed and damages exceeded USD 10 billion.",
+      "key_facts": [
+        "228,000",
+        "10 billion"
+      ],
+      "sources": [
+        {
+          "doc": "shenoi2020",
+          "pdf_page": 2
+        }
+      ],
+      "type": "numeric",
+      "difficulty": "easy"
+    },
+    {
+      "id": "q17",
+      "question": "Which two subduction zones near India can generate tsunamigenic earthquakes?",
+      "answer": "The Andaman–Nicobar–Java–Sumatra zone on the eastern side and the Makran coast on the north-western side.",
+      "key_facts": [
+        "Andaman",
+        "Sumatra",
+        "Makran"
+      ],
+      "sources": [
+        {
+          "doc": "shenoi2020",
+          "pdf_page": 2
+        }
+      ],
+      "type": "factual",
+      "difficulty": "easy"
+    },
+    {
+      "id": "q18",
+      "question": "How accurate are the bottom pressure recorders on tsunami buoys, and why is that sufficient?",
+      "answer": "They sense sea level variations accurate to 2 mm, much finer than typical deep-ocean tsunami heights of 5–10 cm.",
+      "key_facts": [
+        "2 mm",
+        "5–10 cm"
+      ],
+      "sources": [
+        {
+          "doc": "shenoi2020",
+          "pdf_page": 3
+        }
+      ],
+      "type": "factual",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q19",
+      "question": "What is a 'unit source' in the INCOIS tsunami scenario database?",
+      "answer": "A pre-run scenario segment representing an Mw 7.5 earthquake with a 100 km rupture length, 50 km width and 1 m slip. About 1000 such segments cover the Andaman–Sumatra–Java and Makran subduction zones. During an event, the closest unit sources are combined and scaled to match the actual magnitude.",
+      "key_facts": [
+        "7.5",
+        "100 km",
+        "50 km",
+        "1 m",
+        "1000"
+      ],
+      "sources": [
+        {
+          "doc": "shenoi2020",
+          "pdf_page": 3
+        }
+      ],
+      "type": "factual",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q20",
+      "question": "Which numerical model does INCOIS use for pre-computing tsunami travel times and run-up heights?",
+      "answer": "TUNAMI-N2 (Tohoku University's Numerical Analysis Model for Investigation of Near-field Tsunamis, version 2), customized for the Indian Ocean.",
+      "key_facts": [
+        "TUNAMI-N2"
+      ],
+      "sources": [
+        {
+          "doc": "shenoi2020",
+          "pdf_page": 3
+        },
+        {
+          "doc": "manneela2016",
+          "pdf_page": 3
+        }
+      ],
+      "type": "factual",
+      "difficulty": "easy"
+    },
+    {
+      "id": "q21",
+      "question": "What are the IOC/UNESCO target times for the first earthquake bulletin and the first threat assessment bulletin?",
+      "answer": "10 minutes for the first earthquake bulletin and 20 minutes for the first threat assessment bulletin.",
+      "key_facts": [
+        "10 min",
+        "20 min"
+      ],
+      "sources": [
+        {
+          "doc": "shenoi2020",
+          "pdf_page": 4
+        }
+      ],
+      "type": "numeric",
+      "difficulty": "easy"
+    },
+    {
+      "id": "q22",
+      "question": "What accuracy is required for the tsunami forecast amplitude under the IOTWMS key performance indicators?",
+      "answer": "Within a factor of 2.",
+      "key_facts": [
+        "factor of 2"
+      ],
+      "sources": [
+        {
+          "doc": "shenoi2020",
+          "pdf_page": 4
+        }
+      ],
+      "type": "factual",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q23",
+      "question": "How many earthquakes had ITEWS detected by January 2020, and how many were tsunamigenic?",
+      "answer": "616 earthquakes of magnitude 6.5 or more globally, 99 of them in the Indian Ocean; six of the Indian Ocean events were tsunamigenic.",
+      "key_facts": [
+        "616",
+        "99",
+        "six"
+      ],
+      "sources": [
+        {
+          "doc": "shenoi2020",
+          "pdf_page": 5
+        }
+      ],
+      "type": "numeric",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q24",
+      "question": "Which communication channel performed best in the COMMs tests?",
+      "answer": "Email, which reached targeted agencies 90% of the time within 1–2 minutes, followed by GTS and SMS.",
+      "key_facts": [
+        "email",
+        "90%",
+        "1-2 min"
+      ],
+      "sources": [
+        {
+          "doc": "shenoi2020",
+          "pdf_page": 5
+        }
+      ],
+      "type": "factual",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q25",
+      "question": "Which model is used for tsunami inundation prediction, and what bathymetry does it use?",
+      "answer": "The finite-element ADCIRC model, set up for 64°S–29°N and 10°E–160°E with 30 arc-second GEBCO bathymetry. On land, topography was replaced with CARTOSAT plus airborne laser terrain mapping data. The mesh ranges from about 150 m in shallow water to about 20 km in deep water.",
+      "key_facts": [
+        "ADCIRC",
+        "GEBCO",
+        "30 arc-sec"
+      ],
+      "sources": [
+        {
+          "doc": "shenoi2020",
+          "pdf_page": 5
+        },
+        {
+          "doc": "shenoi2020",
+          "pdf_page": 6
+        }
+      ],
+      "type": "factual",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q26",
+      "question": "When was ITEWC recognized as a Tsunami Service Provider, and for how many countries?",
+      "answer": "In October 2012, IOC/UNESCO recognized ITEWC as a Tsunami Service Provider for the Indian Ocean region, serving 28 Indian Ocean rim countries.",
+      "key_facts": [
+        "October 2012",
+        "28"
+      ],
+      "sources": [
+        {
+          "doc": "manneela2016",
+          "pdf_page": 2
+        },
+        {
+          "doc": "shenoi2020",
+          "pdf_page": 7
+        }
+      ],
+      "type": "factual",
+      "difficulty": "easy"
+    },
+    {
+      "id": "q27",
+      "question": "What is the Indian Seismic and GNSS Network (ISGN), and how many stations does it have?",
+      "answer": "A network integrating seismic and GNSS stations across India via VSAT, with two central receiving stations (INCOIS Hyderabad and IMD New Delhi). Both receive data from 130 stations: 100 seismic and 30 GNSS. It is designed to expand to 500 stations.",
+      "key_facts": [
+        "130",
+        "100",
+        "30",
+        "500"
+      ],
+      "sources": [
+        {
+          "doc": "manneela2016",
+          "pdf_page": 4
+        }
+      ],
+      "type": "factual",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q28",
+      "question": "Why is near-field GNSS data useful for tsunami warning?",
+      "answer": "Estimating moment magnitude (Mw) from seismic waveforms can take up to 30 minutes of data, and large earthquakes are often underestimated early on. Displacement data from near-field GNSS stations can estimate Mw much faster, so INCOIS installed co-located strong motion and GNSS sensors at 35 locations in the Andaman & Nicobar Islands.",
+      "key_facts": [
+        "moment magnitude",
+        "30",
+        "35"
+      ],
+      "sources": [
+        {
+          "doc": "manneela2016",
+          "pdf_page": 4
+        },
+        {
+          "doc": "manneela2016",
+          "pdf_page": 6
+        },
+        {
+          "doc": "shenoi2020",
+          "pdf_page": 5
+        }
+      ],
+      "type": "reasoning",
+      "difficulty": "hard"
+    },
+    {
+      "id": "q29",
+      "question": "How much warning time is there for a tsunami reaching mainland India versus the Andaman & Nicobar Islands?",
+      "answer": "Shenoi et al. (2020) say mainland India has at least 1.5 hours, while waves can reach the Andaman & Nicobar Islands in under 20 minutes. Manneela et al. (2016) give a range of about 20 minutes (A&N) to about 3 hours (east coast of the mainland) for a 2004-type event.",
+      "key_facts": [
+        "1.5",
+        "20 min",
+        "3 hour"
+      ],
+      "sources": [
+        {
+          "doc": "shenoi2020",
+          "pdf_page": 5
+        },
+        {
+          "doc": "manneela2016",
+          "pdf_page": 3
+        }
+      ],
+      "type": "multi_doc",
+      "difficulty": "hard"
+    },
+    {
+      "id": "q30",
+      "question": "How many tsunami buoys and tide gauges does the INCOIS sea level network have?",
+      "answer": "Manneela et al. (2016) report seven tsunami buoys and 21 tide gauge stations, with four new buoys and ten more tide gauges being deployed. Shenoi et al. (2020) also say seven tsunami buoys, maintained by INCOIS and NIOT.",
+      "key_facts": [
+        "seven",
+        "21",
+        "four",
+        "ten"
+      ],
+      "sources": [
+        {
+          "doc": "manneela2016",
+          "pdf_page": 3
+        },
+        {
+          "doc": "shenoi2020",
+          "pdf_page": 3
+        }
+      ],
+      "type": "multi_doc",
+      "difficulty": "hard"
+    },
+    {
+      "id": "q31",
+      "question": "How did ITEWC perform against its target for the time to issue the initial earthquake information (2012–2016)?",
+      "answer": "Against a 10/15 minute target, it averaged 8.67 minutes for Indian Ocean earthquakes (21 events) and 10.77 minutes globally (160 events). Over April 2012 to March 2016 it monitored 181 earthquakes of magnitude above 6.5.",
+      "key_facts": [
+        "8.67",
+        "10.77",
+        "181"
+      ],
+      "sources": [
+        {
+          "doc": "manneela2016",
+          "pdf_page": 3
+        },
+        {
+          "doc": "manneela2016",
+          "pdf_page": 4
+        }
+      ],
+      "type": "numeric",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q32",
+      "question": "What did paleo-tsunami studies reveal about the Makran and Andaman subduction zones?",
+      "answer": "The western Makran segment has had no large earthquake since 1945 and appears locked, so it may have accumulated enough strain for a massive earthquake and tsunami. Stratigraphic records from South Andaman show evidence of three historical earthquakes and transoceanic tsunamis in the past 1000 years, besides 2004.",
+      "key_facts": [
+        "Makran",
+        "locked",
+        "1945",
+        "three",
+        "1000"
+      ],
+      "sources": [
+        {
+          "doc": "manneela2016",
+          "pdf_page": 7
+        }
+      ],
+      "type": "summary",
+      "difficulty": "hard"
+    },
+    {
+      "id": "q33",
+      "question": "What does the 'adt' variable mean in AVISO/Copernicus sea level NetCDF files?",
+      "answer": "Absolute Dynamic Topography: the instantaneous sea surface height above the geoid. It is the sum of the sea level anomaly and the mean dynamic topography (ADT = SLA + MDT).",
+      "key_facts": [
+        "absolute dynamic topography",
+        "geoid",
+        "SLA",
+        "MDT"
+      ],
+      "sources": [
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 5
+        },
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 9
+        }
+      ],
+      "type": "factual",
+      "difficulty": "easy"
+    },
+    {
+      "id": "q34",
+      "question": "What RMSE did XGBoost achieve for SLA forecasting in the Bay of Bengal?",
+      "answer": "NOT_IN_CORPUS. The documents use LSTM, not XGBoost. The system should not invent a number.",
+      "key_facts": [],
+      "sources": [],
+      "type": "unanswerable",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q35",
+      "question": "How many tsunami warnings did INCOIS issue in 2024?",
+      "answer": "NOT_IN_CORPUS. The documents only cover performance up to January 2020.",
+      "key_facts": [],
+      "sources": [],
+      "type": "unanswerable",
+      "difficulty": "easy"
+    },
+    {
+      "id": "q36",
+      "question": "How is sea level anomaly (SLA) defined in altimetry?",
+      "answer": "SLA is the difference between the sea surface height (SSH) measured by altimeters and the mean sea surface (MSS): SLA = SSH − MSS.",
+      "key_facts": [
+        "SSH",
+        "MSS"
+      ],
+      "sources": [
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 5
+        },
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 8
+        }
+      ],
+      "type": "factual",
+      "difficulty": "easy"
+    },
+    {
+      "id": "q37",
+      "question": "What are the NetCDF variable names for geostrophic velocities in the C3S sea level product?",
+      "answer": "Absolute geostrophic velocities are 'ugos' (eastward/zonal) and 'vgos' (northward/meridional). Geostrophic velocity anomalies are 'ugosa' and 'vgosa', with mapping errors 'err_ugosa' and 'err_vgosa'.",
+      "key_facts": [
+        "ugos",
+        "vgos",
+        "ugosa",
+        "vgosa"
+      ],
+      "sources": [
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 9
+        },
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 10
+        }
+      ],
+      "type": "factual",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q38",
+      "question": "How are values like sla stored in the NetCDF files, and what scale factor and fill value apply?",
+      "answer": "They are stored as integers with a scale factor of 0.0001 (10^-4), in metres for sla and adt (m/s for velocities). Missing values use _FillValue = -2147483647.",
+      "key_facts": [
+        "0.0001",
+        "-2147483647"
+      ],
+      "sources": [
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 20
+        },
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 22
+        }
+      ],
+      "type": "factual",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q39",
+      "question": "What is the grid resolution and size of a C3S vDT2021 sea level map?",
+      "answer": "A global 0.25° × 0.25° grid with 720 latitudes and 1440 longitudes (latitude −89.875 to 89.875, longitude 0.125 to 359.875).",
+      "key_facts": [
+        "0.25",
+        "720",
+        "1440"
+      ],
+      "sources": [
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 22
+        },
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 24
+        }
+      ],
+      "type": "numeric",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q40",
+      "question": "What reference period is the sea level anomaly computed against?",
+      "answer": "The 20-year period 1993–2012. In addition, the series is referenced so that the mean sea level averaged over 1993 is zero.",
+      "key_facts": [
+        "1993-2012",
+        "20-year"
+      ],
+      "sources": [
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 17
+        }
+      ],
+      "type": "factual",
+      "difficulty": "easy"
+    },
+    {
+      "id": "q41",
+      "question": "What is the file naming convention for the C3S daily sea level files?",
+      "answer": "dt_global_twosat_phy_l4_<DateMap>_vDT2021.nc, where <DateMap> is the map date as YYYYMMDD.",
+      "key_facts": [
+        "dt_global_twosat_phy_l4",
+        "YYYYMMDD"
+      ],
+      "sources": [
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 20
+        }
+      ],
+      "type": "factual",
+      "difficulty": "easy"
+    },
+    {
+      "id": "q42",
+      "question": "What units does the time variable use in the sea level NetCDF files?",
+      "answer": "Days since 1950-01-01 00:00:00 UTC.",
+      "key_facts": [
+        "days since 1950-01-01"
+      ],
+      "sources": [
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 20
+        }
+      ],
+      "type": "factual",
+      "difficulty": "easy"
+    },
+    {
+      "id": "q43",
+      "question": "What is the tpa_correction variable and how should it be used?",
+      "answer": "An empirical correction for the TOPEX-A instrumental drift during 1993–1998, derived from comparing altimetry with tide gauges. It is kept as a separate variable rather than built into the SLA, and can be added to the gridded SLA a posteriori. It is zero after the TOPEX-A period.",
+      "key_facts": [
+        "TOPEX-A",
+        "drift",
+        "1993",
+        "1998"
+      ],
+      "sources": [
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 10
+        },
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 14
+        }
+      ],
+      "type": "reasoning",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q44",
+      "question": "What does the flag_ice variable indicate?",
+      "answer": "It flags sea ice using a 15% sea ice concentration threshold, based on OSI SAF CDR products (OSI-450) until 2016 and interim products (OSI-430-b) from 2016.",
+      "key_facts": [
+        "15%",
+        "OSI-450",
+        "OSI-430-b"
+      ],
+      "sources": [
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 10
+        }
+      ],
+      "type": "factual",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q45",
+      "question": "Which are the reference altimetry missions in the C3S sea level product?",
+      "answer": "TOPEX/Poseidon, Jason-1, Jason-2 (OSTM) and Jason-3, introduced in succession. Jason-3 is the current reference and was to be followed by Sentinel-6 around 2022.",
+      "key_facts": [
+        "TOPEX/Poseidon",
+        "Jason-1",
+        "Jason-2",
+        "Jason-3"
+      ],
+      "sources": [
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 15
+        }
+      ],
+      "type": "factual",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q46",
+      "question": "Why does the C3S product use a two-satellite constellation instead of all available altimeters?",
+      "answer": "A stable number of satellites gives homogeneous sampling over time, which ensures the long-term stability of mean sea level. Using all available satellites would not keep MSL stable.",
+      "key_facts": [
+        "two-satellite",
+        "stability"
+      ],
+      "sources": [
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 8
+        },
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 16
+        }
+      ],
+      "type": "reasoning",
+      "difficulty": "hard"
+    },
+    {
+      "id": "q47",
+      "question": "How are along-track altimeter measurements turned into gridded maps?",
+      "answer": "Inter-mission biases are removed, measurements are cross-calibrated, high-frequency aliased signals are removed, data are low-pass filtered with a 65 km cut-off and subsampled. Then an optimal interpolation maps them onto the grid (Ducet et al. 2000; Le Traon et al. 2003).",
+      "key_facts": [
+        "optimal interpolation",
+        "65"
+      ],
+      "sources": [
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 16
+        }
+      ],
+      "type": "summary",
+      "difficulty": "hard"
+    },
+    {
+      "id": "q48",
+      "question": "How are geostrophic currents computed near the equator compared with elsewhere?",
+      "answer": "Outside the 5°S–5°N band a nine-point stencil method (Arbic et al. 2012) is used. Inside the equatorial band the Lagerloef method (Lagerloef et al. 1999) is used.",
+      "key_facts": [
+        "nine-point",
+        "5°N",
+        "Lagerloef"
+      ],
+      "sources": [
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 9
+        }
+      ],
+      "type": "factual",
+      "difficulty": "hard"
+    },
+    {
+      "id": "q49",
+      "question": "When does the daily C3S sea level time series start, and how quickly are new data added?",
+      "answer": "It starts on 01/01/1993. It is extended about 3 times per year, with a minimum delay (timeliness) of 5 months.",
+      "key_facts": [
+        "1993",
+        "3 times",
+        "5 months"
+      ],
+      "sources": [
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 17
+        }
+      ],
+      "type": "factual",
+      "difficulty": "medium"
+    },
+    {
+      "id": "q50",
+      "question": "What grid resolution was the AVISO SLA used in the LSTM study, and how does that compare with the C3S vDT2021 product?",
+      "answer": "The LSTM study used gridded level-4 AVISO SLA at 0.125° × 0.125° (about 13 km). The C3S vDT2021 product described in the Copernicus guide is coarser, at 0.25°. They are different products.",
+      "key_facts": [
+        "0.125",
+        "0.25"
+      ],
+      "sources": [
+        {
+          "doc": "athul2025",
+          "pdf_page": 5
+        },
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 24
+        }
+      ],
+      "type": "multi_doc",
+      "difficulty": "hard"
+    },
+    {
+      "id": "q51",
+      "question": "What do geostrophic currents derived from altimetry leave out, and does the LSTM paper acknowledge this?",
+      "answer": "Altimetric geostrophic velocities balance pressure gradients against Earth's rotation and exclude the ageostrophic part linked to acceleration. The LSTM paper acknowledges this too: its SLA-derived currents neglect ageostrophic contributions, so the framework may suffer where those are significant.",
+      "key_facts": [
+        "ageostrophic"
+      ],
+      "sources": [
+        {
+          "doc": "copernicus2021",
+          "pdf_page": 9
+        },
+        {
+          "doc": "athul2025",
+          "pdf_page": 4
+        }
+      ],
+      "type": "multi_doc",
+      "difficulty": "hard"
+    },
+    {
+      "id": "q52",
+      "question": "What spatial resolution is the GFS atmospheric data used to train SLA forecasting models in these documents?",
+      "answer": "NOT_IN_CORPUS. None of the documents use GFS data; the LSTM study is univariate (SLA only). The system should say it doesn't know.",
+      "key_facts": [],
+      "sources": [],
+      "type": "unanswerable",
+      "difficulty": "medium"
+    }
+  ]
+}
